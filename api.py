@@ -13,12 +13,17 @@
 
 # Imports
 from pathlib import Path
+
 import casbin
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi_authz import CasbinMiddleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+
+import api.basic_auth as basic_auth
 
 # Global CONSTANTS
 
@@ -31,6 +36,11 @@ enforcer = casbin.Enforcer(
     "api/rbac_model.conf",
     "api/rbac_policy.csv",
 )
+
+backend = basic_auth.BasicAuth()
+
+api.add_middleware(CasbinMiddleware, enforcer=enforcer)
+api.add_middleware(AuthenticationMiddleware, backend=backend)
 
 BASE_PATH = Path(__file__).parent
 print(BASE_PATH)
@@ -62,7 +72,7 @@ async def home(request: Request):
 
 @api.get("/api")
 async def api_index():
-    return "Hello, world."
+    return { "success": True, "message": "Welcome", "data": {"greeting": "Hello, world."}}
 
 
 @api.get("/about", response_class=HTMLResponse)
