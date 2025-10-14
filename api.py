@@ -23,7 +23,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi_authz import CasbinMiddleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 
-import api.basic_auth as basic_auth
+import basic_auth
 
 # Global CONSTANTS
 
@@ -72,7 +72,7 @@ async def home(request: Request):
 
 @api.get("/api")
 async def api_index():
-    return { "success": True, "message": "Welcome", "data": {"greeting": "Hello, world."}}
+    return {"success": True, "message": "Welcome", "data": {"greeting": "Hello, world."}}
 
 
 @api.get("/about", response_class=HTMLResponse)
