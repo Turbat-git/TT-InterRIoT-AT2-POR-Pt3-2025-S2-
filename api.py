@@ -22,6 +22,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_authz import CasbinMiddleware
 from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.authentication import requires, AuthenticationError
+from fastapi.responses import HTMLResponse, JSONResponse
+
 
 import basic_auth
 
@@ -70,9 +73,29 @@ async def home(request: Request):
         name="pages/home.html"
     )
 
+
+@api.exception_handler(AuthenticationError)
+async def auth_exception_handler(request: Request, exc: AuthenticationError):
+    """Custom authentication error handler to return JSON response"""
+    return JSONResponse(
+        content={
+            "success": False,
+            "message": str(exc),
+            "data": []
+        },
+        status_code=401
+    )
+
+
 @api.get("/api")
 async def api_index():
-    return {"success": True, "message": "Welcome", "data": {"greeting": "Hello, world."}}
+    return JSONResponse(content={
+    "success": True,
+    "message": "Endpoint: / ",
+    "data": [
+        {"greeting": "Hello, world."}
+    ]
+    })
 
 
 @api.get("/about", response_class=HTMLResponse)
@@ -85,17 +108,36 @@ async def about(request: Request):
 
 @api.get("/api/data")
 async def api_data(request: Request):
-    return { 'name':'Frank Spencer' }
+    return JSONResponse(content={
+        "success": True,
+        "message": "Endpoint: data",
+        "data": [
+            {"greeting": "Data accessed"}
+        ]
+    })
 
 
 @api.get("/api/ds1/res1")
 async def api_ds1_res1():
-    return "Hello from res1"
-
+    return JSONResponse(content={
+    "success": True,
+    "message": "Endpoint: ds1 / res1",
+    "data": [
+        {"greeting": "Resource 1 accessed"}
+    ]
+    })
 
 @api.get("/api/ds2/res2")
 async def api_ds1_res1():
-    return "Hello from res2"
+    return JSONResponse(content={
+        "success": True,
+        "message": "Endpoint: ds2 / res2",
+        "data": [
+            {"greeting": "Resource 2 accessed"}
+        ]
+    })
+
+
 
 
 # Main Code
